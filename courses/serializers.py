@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Course, Module, Lesson, Quiz, Question,QuixAttempt,Answer
+from .models import Course, Module, Lesson, Quiz, Question,QuixAttempt,Answer, LessonProgress
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -52,3 +52,10 @@ class QuixAttemptSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuixAttempt
         fields = ['id', 'user', 'quiz', 'score', 'completed_at', 'answers']
+
+class CourseProgressSerializer(serializers.Serializer):
+    course_id = serializers.IntegerField()
+    course_title = serializers.CharField()
+    total_lessons = serializers.IntegerField()
+    completed_lessons = serializers.IntegerField()
+    progress_percent = serializers.FloatField()

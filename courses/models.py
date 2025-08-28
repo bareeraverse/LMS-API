@@ -114,3 +114,22 @@ class Answer(models.Model):
     selected_option = models.CharField(max_length=1, blank=True,null=True)
     def __str__(self):
         return f'{self.attempt.user}-{self.question.text}-{self.selected_option}'
+    
+
+class LessonProgress(models.Model):
+    student = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='lesson_progress')
+    lesson = models.ForeignKey(
+        Lesson, 
+        on_delete=models.CASCADE, 
+        related_name='progress')
+    completed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('student', 'lesson')
+
+    def __str__(self):
+        return f"{self.student}-{self.lesson}-{self.completed}"

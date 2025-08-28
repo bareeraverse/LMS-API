@@ -1,13 +1,16 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions
 from rest_framework.generics import ListAPIView
 
 from rest_framework.exceptions import PermissionDenied
-from .models import Course, Module, Lesson,Quiz,Question,QuixAttempt,Answer
-from .serializers import CourseSerializer, ModuleSerializer,LessonSerializer, QuizSerializer,QuestionSerializer
+from .models import Course, Module, Lesson,Quiz,Question,QuixAttempt,Answer,LessonProgress
+from .serializers import CourseProgressSerializer,CourseSerializer, ModuleSerializer,LessonSerializer, QuizSerializer,QuestionSerializer
 from .permissions import IsCourseTeacherOrReadOnly
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
@@ -170,3 +173,61 @@ class QuizViewSet(viewsets.ModelViewSet):
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
+
+class StudentProgressView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, student_id):
+        user = request.user
+
+        # Only the student themselves or admin can access
+        if user.id != student_id and user.role.lower() != "admin":
+            raise PermissionDenied("You cannot view other students' progress.")
+
+        courses = Course.objects.filter(students__id=student_id)
+        data = []
+
+        for course in courses:
+            total_lessons = Lesson.objects.filter(module__course=course).count()
+            completed_lessons = LessonProgress.objects.filter(
+                lesson__module__course=course,
+                student_id=student_id,
+                completed=True
+            ).count()
+            percent = (completed_lessons / total_lessons * 100) if total_lessons > 0 else 0
+
+            data.append({
+                'course_id': course.id,
+                'course_title': course.title,
+                'total_lessons': total_lessons,
+                'completed_lessons': completed_lessons,
+                'progress_percent': round(percent, 2)
+            })
+
+        return Response(data)
+    
+class CourseProgressView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, course_id):
+        course = get_object_or_404(Course, id=course_id)
+        data = []
+
+        for student in course.students.all():
+            total_lessons = Lesson.objects.filter(module__course=course).count()
+            completed_lessons = LessonProgress.objects.filter(
+                lesson__module__course=course,
+                student=student,
+                completed=True
+            ).count()
+            percent = (completed_lessons / total_lessons * 100) if total_lessons > 0 else 0
+
+            data.append({
+                'student_id': student.id,
+                'student_name': student.username,
+                'total_lessons': total_lessons,
+                'completed_lessons': completed_lessons,
+                'progress_percent': round(percent, 2)
+            })
+
+        return Response(data)
