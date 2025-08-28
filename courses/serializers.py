@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Course, Module, Lesson, Quiz, Question,QuixAttempt,Answer, LessonProgress
+from .models import Course, Certificate,Module, Lesson, Quiz, Question,QuixAttempt,Answer, LessonProgress
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -59,3 +59,9 @@ class CourseProgressSerializer(serializers.Serializer):
     total_lessons = serializers.IntegerField()
     completed_lessons = serializers.IntegerField()
     progress_percent = serializers.FloatField()
+
+class CertificateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Certificate
+        fields = ['id', 'course', 'student', 'issued_by', 'issued_at', 'file']
+        read_only_fields = ['issued_by', 'issued_at', 'file']

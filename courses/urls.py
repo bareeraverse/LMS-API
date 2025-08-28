@@ -10,7 +10,8 @@ from .views import (
     LessonListCreateView,
     LessonDetailView,
     StudentProgressView,       
-    CourseProgressView         
+    CourseProgressView,
+    CertificateView         
 )
 router = DefaultRouter()
 router.register(r'courses', CourseViewSet, basename='course')
@@ -25,5 +26,8 @@ urlpatterns = [
     path('lessons/<int:pk>/', LessonDetailView.as_view(), name='lesson-detail'),
     path('students/<int:student_id>/enrollments/', StudentEnrollmentListView.as_view(), name='student-enrollments'),
     path('students/<int:student_id>/progress/', StudentProgressView.as_view(), name='student-progress'),
+   
     path('courses/<int:course_id>/progress/', CourseProgressView.as_view(), name='course-progress'),
+    path('courses/<int:course_id>/certificate/', CertificateView.as_view(), name='course-certificate'),
+
 ]

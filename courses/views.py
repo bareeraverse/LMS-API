@@ -7,11 +7,14 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions
 from rest_framework.generics import ListAPIView
+from django.contrib.auth import get_user_model
 
 from rest_framework.exceptions import PermissionDenied
-from .models import Course, Module, Lesson,Quiz,Question,QuixAttempt,Answer,LessonProgress
-from .serializers import CourseProgressSerializer,CourseSerializer, ModuleSerializer,LessonSerializer, QuizSerializer,QuestionSerializer
+from .models import Course,Certificate, Module, Lesson,Quiz,Question,QuixAttempt,Answer,LessonProgress
+from .serializers import CertificateSerializer,CourseSerializer, ModuleSerializer,LessonSerializer, QuizSerializer,QuestionSerializer
 from .permissions import IsCourseTeacherOrReadOnly
+User = get_user_model()
+
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
@@ -231,3 +234,38 @@ class CourseProgressView(APIView):
             })
 
         return Response(data)
+class CertificateView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, course_id):
+        user = request.user
+        course = get_object_or_404(Course, pk=course_id)
+
+        cert = Certificate.objects.filter(course=course, student=user).first()
+        if not cert:
+            return Response({"detail": "Certificate not found or course not completed."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = CertificateSerializer(cert)
+        return Response(serializer.data)
+
+    def post(self, request, course_id):
+        user = request.user
+        course = get_object_or_404(Course, pk=course_id)
+
+        # Only teacher/admin can issue certificate
+        if user.role.lower() not in ['teacher', 'admin']:
+            return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
+
+        student_id = request.data.get('student_id')
+        if not student_id:
+            return Response({"detail": "student_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        student = get_object_or_404(User, pk=student_id)
+
+        # Optional: check course completion
+        # For now, we allow issuing directly
+
+        certificate, created = Certificate.objects.get_or_create(course=course, student=student, issued_by=user)
+
+        serializer = CertificateSerializer(certificate)
+        return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)

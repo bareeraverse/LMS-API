@@ -133,3 +133,15 @@ class LessonProgress(models.Model):
 
     def __str__(self):
         return f"{self.student}-{self.lesson}-{self.completed}"
+class Certificate(models.Model):
+    course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='certificates')
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='certificates')
+    issued_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='issued_certificates')
+    issued_at = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(upload_to='certificates/', null=True, blank=True)  # optional PDF/PNG
+
+    class Meta:
+        unique_together = ('course', 'student')
+
+    def __str__(self):
+        return f"{self.student.username} - {self.course.title} Certificate"
