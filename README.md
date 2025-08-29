@@ -52,3 +52,9 @@ Built with **Django REST Framework (DRF)**, this project covers authentication, 
 - **Tools**: Postman for API testing  
 
 ---
+## API Testing
+
+Use Postman or cURL to test endpoints.
+JWT authentication required for protected routes.
+
+---
