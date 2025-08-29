@@ -133,6 +133,7 @@ class LessonProgress(models.Model):
 
     def __str__(self):
         return f"{self.student}-{self.lesson}-{self.completed}"
+    
 class Certificate(models.Model):
     course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='certificates')
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='certificates')

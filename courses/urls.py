@@ -16,7 +16,7 @@ from .views import (
 router = DefaultRouter()
 router.register(r'courses', CourseViewSet, basename='course')
 router.register(r'quizzes', QuizViewSet, basename='quiz')
-router.register(r'questions', QuestionViewSet, basename='question')  # yahan add kiya
+router.register(r'questions', QuestionViewSet, basename='question') 
 
 urlpatterns = [
     path('', include(router.urls)),

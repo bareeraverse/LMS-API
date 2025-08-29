@@ -183,7 +183,6 @@ class StudentProgressView(APIView):
     def get(self, request, student_id):
         user = request.user
 
-        # Only the student themselves or admin can access
         if user.id != student_id and user.role.lower() != "admin":
             raise PermissionDenied("You cannot view other students' progress.")
 
@@ -261,9 +260,6 @@ class CertificateView(APIView):
             return Response({"detail": "student_id is required."}, status=status.HTTP_400_BAD_REQUEST)
 
         student = get_object_or_404(User, pk=student_id)
-
-        # Optional: check course completion
-        # For now, we allow issuing directly
 
         certificate, created = Certificate.objects.get_or_create(course=course, student=student, issued_by=user)
 
