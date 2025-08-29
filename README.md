@@ -52,6 +52,3 @@ Built with **Django REST Framework (DRF)**, this project covers authentication, 
 - **Tools**: Postman for API testing  
 
 ---
-
- https://github.com/yourusername/lms-api.git
-   cd lms-api
